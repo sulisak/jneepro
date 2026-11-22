@@ -4618,6 +4618,7 @@ if($_SESSION['user_type']=='0' || '2' || '3'){
                                                         <tr class="trheader">
                                                             <th><?=$lang_rank?>test</th>
                                                             <th><?=$lang_runno?></th>
+                                                            <th>ປະເພດບິນ</th>
                                                             <th><?=$lang_cusname?></th>
 
                                                             <th><?php echo $lang_sp_119;?></th>
@@ -4674,6 +4675,15 @@ if($_SESSION['user_type']=='0' || '2' || '3'){
                                                                     ng-click="Getone(x)">{{x.sale_runno}}</button>
 
 
+                                                            </td>
+                                                            <td
+                                                                style="font-family: 'Phetsarath OT', sans-serif; color: #000;">
+                                                                <span ng-if="x.sale_type == 1 || x.sale_type == '1'"
+                                                                    class="label label-warning"
+                                                                    style="color: #000; font-family: 'Phetsarath OT', sans-serif;">ໃບບິນຂາຍຍ່ອຍ</span>
+                                                                <span ng-if="x.sale_type == 2 || x.sale_type == '2'"
+                                                                    class="label label-success"
+                                                                    style="color: #000; font-family: 'Phetsarath OT', sans-serif;">ໃບບິນຂາຍສົ່ງ</span>
                                                             </td>
                                                             <td>{{x.cus_name}}
 
@@ -7473,26 +7483,84 @@ if($_SESSION['owner_vat_status']=='0' || $_SESSION['owner_vat_status']=='1'){
 
                                     // updated Getone function with Fetch payment ຫຼາຍຊ່ອງທາງ for A4 modal ---------------
 
-                                    $scope.Getone = function(x, activeSaleType) {
-                                        $('#Openone').modal('show');
+                                    // $scope.Getone = function(x, activeSaleType) {
+                                    //     $('#Openone').modal('show');
 
+                                    //     var hasExplicitArg = (activeSaleType !== undefined &&
+                                    //         activeSaleType !== null && String(activeSaleType).trim() !==
+                                    //         '');
+                                    //     var hasRowType = (x && x.sale_type !== undefined && x.sale_type !==
+                                    //         null && String(x.sale_type).trim() !== '');
+                                    //     var savedType = localStorage.getItem('saved_sale_type');
+
+                                    //     var rawType = hasExplicitArg ?
+                                    //         activeSaleType :
+                                    //         (hasRowType ? x.sale_type : savedType);
+
+                                    //     var cleanType = (rawType !== undefined && rawType !== null) ?
+                                    //         String(rawType).trim() : '';
+                                    //     if (cleanType === '1' || cleanType === '2') {
+                                    //         $scope.sale_type = cleanType;
+                                    //         localStorage.setItem('saved_sale_type', cleanType);
+                                    //     }
+
+                                    //     $http.post("Salelist/Seemorepay", {
+                                    //         sale_runno: x.sale_runno
+                                    //     }).then(function(response) {
+                                    //         $scope.getonepaylist = response.data;
+                                    //     });
+
+                                    //     $http.post("Salelist/Getone", {
+                                    //         sale_runno: x.sale_runno
+                                    //     }).success(function(response) {
+                                    //         $scope.listone = response;
+                                    //         $scope.cus_name = x.cus_name;
+                                    //         $scope.cus_address_all = x.cus_address_all;
+                                    //         $scope.sale_runno = x.sale_runno;
+                                    //         $scope.sumsale_discount = x.sumsale_discount;
+                                    //         $scope.sumsale_num = x.sumsale_num;
+                                    //         $scope.sumsale_price = x.sumsale_price;
+                                    //         $scope.money_from_customer3 = x.money_from_customer;
+                                    //         $scope.vat3 = x.vat;
+                                    //         $scope.price_vat_all = x.price_vat_all;
+                                    //         $scope.sumsalevat = (parseFloat(x.sumsale_price) * (
+                                    //             parseFloat(x.vat) / 100)) + parseFloat(x
+                                    //             .sumsale_price);
+                                    //         $scope.money_changeto_customer = x
+                                    //             .money_changeto_customer;
+                                    //         $scope.adddate = x.adddate;
+                                    //         $scope.discount_last2 = x.discount_last;
+                                    //         $scope.pay_type = x.pay_type;
+                                    //         $scope.number_for_cus = x.number_for_cus;
+                                    //         $scope.saleremark = x.saleremark;
+                                    //         $scope.showremarkonslip = x.showremarkonslip;
+                                    //         $scope.taxnumber = x.taxnumber;
+                                    //         $scope.sale_type = x.sale_type;
+                                    //     });
+                                    // };
+
+
+                                    $scope.Getone = function(x, activeSaleType) {
+                                        if (!x) return;
+
+                                        // 1. Set immediately if passed on click or already on x (no stale localStorage fallback)
                                         var hasExplicitArg = (activeSaleType !== undefined &&
                                             activeSaleType !== null && String(activeSaleType).trim() !==
                                             '');
-                                        var hasRowType = (x && x.sale_type !== undefined && x.sale_type !==
+                                        var hasRowType = (x.sale_type !== undefined && x.sale_type !==
                                             null && String(x.sale_type).trim() !== '');
-                                        var savedType = localStorage.getItem('saved_sale_type');
 
-                                        var rawType = hasExplicitArg ?
-                                            activeSaleType :
-                                            (hasRowType ? x.sale_type : savedType);
+                                        var rawType = hasExplicitArg ? activeSaleType : (hasRowType ? x
+                                            .sale_type : '');
+                                        var cleanType = String(rawType).trim();
 
-                                        var cleanType = (rawType !== undefined && rawType !== null) ?
-                                            String(rawType).trim() : '';
                                         if (cleanType === '1' || cleanType === '2') {
                                             $scope.sale_type = cleanType;
-                                            localStorage.setItem('saved_sale_type', cleanType);
+                                        } else {
+                                            $scope.sale_type = '';
                                         }
+
+                                        $('#Openone').modal('show');
 
                                         $http.post("Salelist/Seemorepay", {
                                             sale_runno: x.sale_runno
@@ -7525,7 +7593,20 @@ if($_SESSION['owner_vat_status']=='0' || $_SESSION['owner_vat_status']=='1'){
                                             $scope.saleremark = x.saleremark;
                                             $scope.showremarkonslip = x.showremarkonslip;
                                             $scope.taxnumber = x.taxnumber;
-                                            $scope.sale_type = x.sale_type;
+
+                                            // 2. Read authoritative sh.sale_type from Getone response[0] (do NOT overwrite with undefined x.sale_type)
+                                            var dbType = (Array.isArray(response) && response
+                                                    .length > 0 &&
+                                                    response[0].sale_type !== undefined && response[
+                                                        0].sale_type !== null) ?
+                                                String(response[0].sale_type).trim() :
+                                                '';
+
+                                            if (dbType === '1' || dbType === '2') {
+                                                $scope.sale_type = dbType;
+                                            } else if (cleanType === '1' || cleanType === '2') {
+                                                $scope.sale_type = cleanType;
+                                            }
                                         });
                                     };
 
