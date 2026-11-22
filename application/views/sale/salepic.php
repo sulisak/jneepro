@@ -423,7 +423,7 @@ else {
 
 
 
-                               <div class="form-group">
+                                <div class="form-group">
                                     <select class="form-control" ng-model="sale_type"
                                         style="background-color:orange;color:#fff;">
                                         <option value="1">{{name_of_price_list[0].price1}}</option>
@@ -482,49 +482,60 @@ else {
                         <div id="salebox" style="height: 300px;overflow: auto;">
 
 
-
-
-
                             <div ng-if="listsale==''" style="height:100px;text-align:center;"><br /><br />
                                 <?php echo $lang_sp_12;?></div>
 
 
 
                             <table class="table table-hover">
-                                <!-- <thead>
-		<tr>
-			<th style="text-align:center;"><?=$lang_num?></th>
-
-			 <th style="text-align:center;">สินค้าเสริม</th>
-			<th style="text-align:center;"><?=$lang_product?></th>
-			<th style="text-align:center;"><?=$lang_productunit?></th>
-			<th style="text-align:center;"><?=$lang_price?></th>
-			<th class="text-right"><?=$lang_sum?></th>
-			<th><?=$lang_delete?></th>
-		</tr>
-	</thead> -->
 
 
-                                <!-- 1. Ipa-float ti Delete Button iti ngato ken iti kanawan no adda linaon ti listsale -->
+
+
                                 <div style="margin-bottom: 5px; overflow: hidden;" ng-if="listsale!=''">
+
+
+
+
                                     <span style="float: right;">
                                         <?php if(!isset($arr) || $arr[32]->status==true){?>
                                         <button class="btn btn-danger btn-xs" ng-click="Deletepush('all')">
-                                            <?php echo $lang_sp_16;?>
+                                            xທັ້ງໝົດ
                                         </button>
                                         <?php } ?>
 
                                         <?php if(isset($arr) && $arr[32]->status==false){?>
                                         <button class="btn btn-danger btn-xs" ng-click="Deletepush_pass('all')">
-                                            <?php echo $lang_sp_16;?>
+                                            xທັ້ງໝົດ
                                         </button>
                                         <?php } ?>
                                     </span>
                                 </div>
                                 <tbody>
+                                    <!-- add new 221126 -------------------->
+                                    <tr>
+                                        <td
+                                            style="text-align: center; font-family: 'Phetsarath OT', sans-serif; color: #000;">
+                                            <span ng-if="sale_type == 1 || sale_type == '1'" class="label label-warning"
+                                                style="color: #000;">ບິນຍ່ອຍ</span>
+                                            <span ng-if="sale_type == 2 || sale_type == '2'" class="label label-success"
+                                                style="color: #000;">ບິນສົ່ງ</span>
+                                            <span
+                                                ng-if="sale_type != 1 && sale_type != '1' && sale_type != 2 && sale_type != '2'"
+                                                style="color: #000;">-</span>
+                                        </td>
+                                    </tr>
+
+
+
+                                    <!-- add new 221126 -------------------->
 
                                     <tr ng-repeat="x in listsale" style="background-color:#eee;font-size:18px;">
-                                        <span>ຈຳນວນ</span>
+
+                                        <td style="text-align: center;">
+                                            <span>ຈຳນວນ</span>
+                                        </td>
+
                                         <td style="text-align:left;">
 
                                             <?php if(!isset($arr) || $arr[23]->status==true){?>
@@ -1122,9 +1133,10 @@ if($_SESSION['owner_vat_status']=='2'){
                                             <thead>
                                                 <tr class="trheader">
                                                     <th><?=$lang_rank?></th>
-                                                    <th><?php echo $lang_sp_32;?></th>
-                                                    <th><?php echo $lang_sp_33;?></th>
-                                                    <th><?php echo $lang_sp_34;?></th>
+                                                    <th>ຊຳລະເງິນ</th>
+                                                    <th>ໃບສະເໜີລາຄາ</th>
+                                                    <th>ປະເພດໃບສະເໜີ</th>
+                                                    <th>ໃບສົ່ງສິນຄ້າ</th>
                                                     <th><?=$lang_cusname?></th>
 
 
@@ -1157,14 +1169,30 @@ if($_SESSION['owner_vat_status']=='2'){
                                                     <td>
                                                         <button class="btn btn-primary btn-sm"
                                                             ng-click="Getonequotation2pay(x)">
-                                                            <?php echo $lang_sp_36;?>
+                                                            ຊຳລະເງິນ
                                                         </button>
                                                     </td>
+
+                                                    <!-- add new 221126  -->
+                                                    <td
+                                                        style="text-align: center; font-family: 'Phetsarath OT', sans-serif; color: black;">
+                                                        <span ng-if="x.sale_type == 1 || x.sale_type == '1'"
+                                                            class="label label-warning"
+                                                            style="color: #000;">ບິນຍ່ອຍ</span>
+                                                        <span ng-if="x.sale_type == 2 || x.sale_type == '2'"
+                                                            class="label label-success"
+                                                            style="color: #000;">ບິນສົ່ງ</span>
+                                                        <span
+                                                            ng-if="x.sale_type != 1 && x.sale_type != '1' && x.sale_type != 2 && x.sale_type != '2'"
+                                                            style="color: #000;">-</span>
+                                                    </td>
+                                                    <!-- add new 221126  -->
+
                                                     <td><button class="btn btn-info btn-sm"
                                                             ng-click="Getonequotation(x,'1')">
 
                                                             <span class="glyphicon glyphicon-print"></span>
-                                                            <?php echo $lang_sp_37;?></button>
+                                                            ໃບສະເໜີລາຄາ</button>
 
 
                                                     </td>
@@ -1173,7 +1201,7 @@ if($_SESSION['owner_vat_status']=='2'){
                                                             ng-click="Getonequotation(x,'2')">
 
                                                             <span class="glyphicon glyphicon-print">
-                                                            </span><?php echo $lang_sp_38;?>
+                                                            </span>ໃບສົ່ງສິນຄ້າ
                                                         </button>
 
 
@@ -1514,7 +1542,7 @@ if($_SESSION['owner_vat_status']=='2'){
 
                                         <center>
 
-                                          
+
 
                                             <button ng-show="printer_ul =='0'" class="btn btn-primary btn-lg"
                                                 style="height:100px;font-size: 30px;font-weight: bold;"
@@ -1526,11 +1554,17 @@ if($_SESSION['owner_vat_status']=='2'){
 
 
 
-                                            <button class="btn btn-primary btn-lg" ng-click="printDivfull(x,sale_type)"
+                                            <!-- <button class="btn btn-primary btn-lg" ng-click="printDivfull(x,sale_type)"
                                                 style="height:100px; font-size: 30px; font-weight: bold;">
                                                 <?=$lang_billfull?>(A4)
+                                            </button> -->
+                                            <!-- update 221126 ---------------->
+                                            <button class="btn btn-primary btn-lg"
+                                                ng-click="printDivfull(x, x.sale_type || sale_type)"
+                                                style="height:100px; font-size: 30px; font-weight: bold; font-family: 'Phetsarath OT', sans-serif;">
+                                                ໃບບິນຂະໜາດໃຫຍ່(A4)
                                             </button>
-
+                                            <!-- update 221126 ---------------->
 
                                             <?php if($_SESSION['show_order_on_slip']=='1'){ ?>
                                             <br /><br />
@@ -1893,7 +1927,7 @@ pregetlistcus()" class="form-control" placeholder="<?php echo $lang_sp_42;?>"
                                     </tr>
                                 </table>
 
-                                
+
                                 <table class="table table-hover table-bordered"
                                     style="font-size: 10px; margin-bottom: 10px; width: 100%;">
                                     <thead>
@@ -1908,7 +1942,7 @@ pregetlistcus()" class="form-control" placeholder="<?php echo $lang_sp_42;?>"
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        
+
                                         <tr ng-repeat="x in listone">
                                             <td style="text-align: center;">{{$index+1}}</td>
                                             <td style="text-align: left;">{{x.product_code}}</td>
@@ -4146,10 +4180,11 @@ if($_SESSION['open_number_for_cus']=='1'){
                                     <h1><b>
                                             {{product_name_order}}
                                         </b></h1>
-                                      <form>
-                                    <input type="password" placeholder="<?php echo $lang_sp_114;?>" ng-model="orderpass"
-                                        class="form-control" style="height:50px;font-size50px;">
-																				</form>
+                                    <form>
+                                        <input type="password" placeholder="<?php echo $lang_sp_114;?>"
+                                            ng-model="orderpass" class="form-control"
+                                            style="height:50px;font-size50px;">
+                                    </form>
                                     <br />
 
 
@@ -5885,12 +5920,63 @@ if($_SESSION['owner_vat_status']=='0' || $_SESSION['owner_vat_status']=='1'){
 
                                     };
 
+                                    // $scope.printDivfull = function(x, sale_type) {
+                                    //     var activeSaleType = sale_type || $scope.sale_type || localStorage
+                                    //         .getItem('saved_sale_type') || '1';
+                                    //     var selectedItem = x || ($scope.list && $scope.list.length > 0 ?
+                                    //         $scope.list[0] : null);
+
+                                    //     if (selectedItem) {
+                                    //         $scope.Getone(selectedItem, activeSaleType);
+                                    //     }
+
+                                    //     $('#Openonemini').modal('hide');
+                                    //     $('#Openone').modal('show');
+                                    // };
+
+
+
+                                    // $scope.sale_type = localStorage.getItem('saved_sale_type') || '1';
+
+                                    // // 2. Automatically sync localStorage whenever the dropdown changes
+                                    // $scope.$watch('sale_type', function(newVal) {
+                                    //     if (newVal) {
+                                    //         localStorage.setItem('saved_sale_type', newVal);
+                                    //     }
+                                    // });
+                                    // add new 221126 --------------
+
                                     $scope.printDivfull = function(x, sale_type) {
-                                        var activeSaleType = sale_type || $scope.sale_type || localStorage
-                                            .getItem('saved_sale_type') || '1';
+                                        // 1. Resolve the bill item first so we can read item.sale_type reliably
                                         var selectedItem = x || ($scope.list && $scope.list.length > 0 ?
                                             $scope.list[0] : null);
+                                        if (!selectedItem && $scope.listone) {
+                                            selectedItem = Array.isArray($scope.listone) ? $scope.listone[
+                                                0] : $scope.listone;
+                                        }
 
+                                        // Helper: accept only '1' or '2'
+                                        function normalizeSaleType(val) {
+                                            if (val === undefined || val === null) return '';
+                                            var str = String(val).trim();
+                                            return (str === '1' || str === '2') ? str : '';
+                                        }
+
+                                        // 2. Priority order: explicit sale_type arg -> selectedItem.sale_type -> $scope.sale_type -> localStorage
+                                        var activeSaleType =
+                                            normalizeSaleType(sale_type) ||
+                                            normalizeSaleType(selectedItem && selectedItem.sale_type) ||
+                                            normalizeSaleType($scope.sale_type) ||
+                                            normalizeSaleType(localStorage.getItem('saved_sale_type')) ||
+                                            '';
+
+                                        // 3. Sync $scope.sale_type and localStorage when valid ('1' or '2')
+                                        if (activeSaleType === '1' || activeSaleType === '2') {
+                                            $scope.sale_type = activeSaleType;
+                                            localStorage.setItem('saved_sale_type', activeSaleType);
+                                        }
+
+                                        // 4. Pass resolved sale_type into Getone and switch modals
                                         if (selectedItem) {
                                             $scope.Getone(selectedItem, activeSaleType);
                                         }
@@ -5900,15 +5986,18 @@ if($_SESSION['owner_vat_status']=='0' || $_SESSION['owner_vat_status']=='1'){
                                     };
 
 
-                                    // 1. Initialize sale_type from localStorage immediately upon load
-                                    $scope.sale_type = localStorage.getItem('saved_sale_type') || '1';
 
-                                    // 2. Automatically sync localStorage whenever the dropdown changes
+                                    // $scope.sale_type ----------------------------------------------------
+                                    $scope.sale_type = localStorage.getItem('saved_sale_type') || '';
+
                                     $scope.$watch('sale_type', function(newVal) {
-                                        if (newVal) {
-                                            localStorage.setItem('saved_sale_type', newVal);
+                                        var val = (newVal !== undefined && newVal !== null) ? String(
+                                            newVal).trim() : '';
+                                        if (val === '1' || val === '2') {
+                                            localStorage.setItem('saved_sale_type', val);
                                         }
                                     });
+                                    // add new 221126 --------------
 
 
 
@@ -7383,24 +7472,34 @@ if($_SESSION['owner_vat_status']=='0' || $_SESSION['owner_vat_status']=='1'){
                                     // end origin without Fetch payment ຫຼາຍຊ່ອງທາງ for A4 modal ---------------
 
                                     // updated Getone function with Fetch payment ຫຼາຍຊ່ອງທາງ for A4 modal ---------------
-                                   
-																			$scope.Getone = function(x, activeSaleType) {
+
+                                    $scope.Getone = function(x, activeSaleType) {
                                         $('#Openone').modal('show');
 
-                                        // Priority: Passed saleType -> record's sale_type -> fallback '1'
-                                        var selectedSaleType = activeSaleType || (x && x.sale_type) ||
-                                            localStorage.getItem('saved_sale_type') || '1';
-                                        $scope.sale_type = String(selectedSaleType);
-                                        localStorage.setItem('saved_sale_type', $scope.sale_type);
+                                        var hasExplicitArg = (activeSaleType !== undefined &&
+                                            activeSaleType !== null && String(activeSaleType).trim() !==
+                                            '');
+                                        var hasRowType = (x && x.sale_type !== undefined && x.sale_type !==
+                                            null && String(x.sale_type).trim() !== '');
+                                        var savedType = localStorage.getItem('saved_sale_type');
 
-                                        // Fetch payment ຫຼາຍຊ່ອງທາງ for A4 modal
+                                        var rawType = hasExplicitArg ?
+                                            activeSaleType :
+                                            (hasRowType ? x.sale_type : savedType);
+
+                                        var cleanType = (rawType !== undefined && rawType !== null) ?
+                                            String(rawType).trim() : '';
+                                        if (cleanType === '1' || cleanType === '2') {
+                                            $scope.sale_type = cleanType;
+                                            localStorage.setItem('saved_sale_type', cleanType);
+                                        }
+
                                         $http.post("Salelist/Seemorepay", {
                                             sale_runno: x.sale_runno
                                         }).then(function(response) {
                                             $scope.getonepaylist = response.data;
                                         });
 
-                                        // Existing Getone details fetch
                                         $http.post("Salelist/Getone", {
                                             sale_runno: x.sale_runno
                                         }).success(function(response) {
@@ -7426,6 +7525,7 @@ if($_SESSION['owner_vat_status']=='0' || $_SESSION['owner_vat_status']=='1'){
                                             $scope.saleremark = x.saleremark;
                                             $scope.showremarkonslip = x.showremarkonslip;
                                             $scope.taxnumber = x.taxnumber;
+                                            $scope.sale_type = x.sale_type;
                                         });
                                     };
 
@@ -7852,6 +7952,12 @@ if($_SESSION['owner_vat_status']=='0' || $_SESSION['owner_vat_status']=='1'){
 
                                             $scope.pay_type = x.pay_type;
 
+                                            // add new 221126----------
+                                            $scope.sale_type = x.sale_type;
+
+                                            // add new 221126----------
+
+
                                         });
 
                                         $('#Showquotationlistmodal').modal('hide');
@@ -8093,5 +8199,3 @@ if($_SESSION['owner_vat_status']=='0' || $_SESSION['owner_vat_status']=='1'){
 
                                 }
                                 </script>
-
-                               

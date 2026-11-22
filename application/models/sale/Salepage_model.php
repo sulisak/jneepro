@@ -809,93 +809,211 @@ $this->db->query('UPDATE sale_list_header
   
   
   
+// original -----------------------------------
+
+//       public function Addheader($data,$morepaynum)
+//         {
+// 	$data2['cmp'] = $morepaynum;	
+// 	$data2['saleremark'] = $data['saleremark'];	
+// 	$data2['showremarkonslip'] = $data['showremarkonslip'];
+// $data2['cus_name'] = $data['cus_name'];
+//     $data2['cus_id'] = $data['cus_id'];
+//     $data2['cus_address_all'] = $data['cus_address_all'];
+//     $data2['sumsale_discount'] = $data['sumsale_discount'];
+//     $data2['sumsale_num '] = $data['sumsale_num'];
+//     $data2['sumsale_price'] = $data['sumsale_price'];
+//     $data2['money_from_customer'] =  $data['money_from_customer'];
+//     $data2['money_changeto_customer'] = $data['money_changeto_customer'];
+//     $data2['vat'] = $data['vat'];
+//     $data2['product_score_all'] = $data['product_score_all'];
+//     $data2['sale_runno'] = $data['sale_runno'];
+//     $data2['adddate'] = $data['adddate'];
+// 	$data2['savedate'] = $data['savedate'];
+
+//     $data2['sale_type'] = $data['sale_type'];
+//     $data2['pay_type'] = $data['pay_type'];
+//     $data2['reserv'] = $data['reserv'];
+//     $data2['discount_last'] = $data['discount_last'];
+
+// $data2['owner_id'] = $_SESSION['owner_id'];
+// $data2['user_id'] = $_SESSION['user_id'];
+// $data2['store_id'] = $_SESSION['store_id'];
+// $data2['shift_id'] = $_SESSION['shift_id'];
+// $data2['branch_id'] = $_SESSION['branch_id'];
+
+// $data2['number_for_cus'] = $data['number_for_cus'];
+
+// $this->db->insert("sale_list_header", $data2);
+
+// $this->db->query('UPDATE customer_owner
+//     SET product_score_all=product_score_all + '.$data2['product_score_all'].' WHERE cus_id="'.$data2['cus_id'].'" and  owner_id="'.$_SESSION['owner_id'].'"');
 
 
-      public function Addheader($data,$morepaynum)
-        {
-	$data2['cmp'] = $morepaynum;	
-	$data2['saleremark'] = $data['saleremark'];	
-	$data2['showremarkonslip'] = $data['showremarkonslip'];
-$data2['cus_name'] = $data['cus_name'];
-    $data2['cus_id'] = $data['cus_id'];
-    $data2['cus_address_all'] = $data['cus_address_all'];
-    $data2['sumsale_discount'] = $data['sumsale_discount'];
-    $data2['sumsale_num '] = $data['sumsale_num'];
-    $data2['sumsale_price'] = $data['sumsale_price'];
-    $data2['money_from_customer'] =  $data['money_from_customer'];
-    $data2['money_changeto_customer'] = $data['money_changeto_customer'];
-    $data2['vat'] = $data['vat'];
-    $data2['product_score_all'] = $data['product_score_all'];
+//     $this->db->query('UPDATE branch
+//         SET number_for_cus=number_for_cus + "1" WHERE branch_id="'.$_SESSION['branch_id'].'"');
+
+
+//         $dlsd = $this->db->query('DELETE FROM sale_list_datail
+//           WHERE sale_runno="'.$data['sale_runno'].'"
+//         AND adddate!="'.$data['adddate'].'"
+//           ');
+
+// //delete all from showcus2mer
+// $this->db->query('DELETE FROM sale_list_cus2mer WHERE user_id="'.$_SESSION['user_id'].'"');
+
+
+// if($data['round_money'] !=''){
+// $data_round['sale_runno'] = $data['sale_runno'];
+// $data_round['round_money'] = $data['round_money'];
+// $data_round['round_money_is'] = $data['round_money_is'];
+// $this->db->insert("log_round", $data_round);
+// }
+
+// if($data2['cus_id']!='0'){
+
+// $query_mpr = $this->db->query('SELECT * FROM money_to_point_rule ORDER BY id DESC');
+// $data_mpr = $query_mpr->result_array();
+
+// // original ---------------
+// $cusaddpoint = (floor(($data2['sumsale_price']-$data2['discount_last'])/$data_mpr[0]['cus_money_if'])*$data_mpr[0]['point_will']);
+// // end original ---------------
+
+
+
+// $this->db->query('UPDATE customer_owner
+//     SET product_score_all=product_score_all + '.floor($cusaddpoint).'
+//     WHERE cus_id="'.$data2['cus_id'].'" and  owner_id="'.$_SESSION['owner_id'].'"');
+	
+// $this->db->query('UPDATE sale_list_header
+//     SET product_score_all=product_score_all + '.floor($cusaddpoint).'
+//     WHERE sale_runno="'.$data['sale_runno'].'"');
+
+
+//    }
+
+
+// }
+// original -----------------------------------
+
+// update 221126 ----------------------
+public function Addheader($data, $morepaynum)
+{
+    $data2['cmp'] = $morepaynum;
+    // FIXED: Guard optional fields with isset() to avoid Undefined index notices
+    $data2['saleremark'] = isset($data['saleremark']) ? $data['saleremark'] : '';
+    // FIXED: Guard showremarkonslip with default '0' when missing
+    $data2['showremarkonslip'] = isset($data['showremarkonslip']) ? $data['showremarkonslip'] : '0';
+    // FIXED: Guard cus_name when missing
+    $data2['cus_name'] = isset($data['cus_name']) ? $data['cus_name'] : '';
+    // FIXED: Guard cus_id and default to walk-in '0' when missing
+    $data2['cus_id'] = isset($data['cus_id']) ? $data['cus_id'] : '0';
+    // FIXED: Guard cus_address_all when missing
+    $data2['cus_address_all'] = isset($data['cus_address_all']) ? $data['cus_address_all'] : '';
+    // FIXED: Guard sumsale_discount and default to 0
+    $data2['sumsale_discount'] = isset($data['sumsale_discount']) ? $data['sumsale_discount'] : 0;
+    // FIXED: Removed trailing space in key 'sumsale_num ' -> 'sumsale_num' and guarded with isset()
+    $data2['sumsale_num'] = isset($data['sumsale_num']) ? $data['sumsale_num'] : 0;
+    // FIXED: Guard sumsale_price and default to 0
+    $data2['sumsale_price'] = isset($data['sumsale_price']) ? $data['sumsale_price'] : 0;
+    // FIXED: Guard money_from_customer and default to 0
+    $data2['money_from_customer'] = isset($data['money_from_customer']) ? $data['money_from_customer'] : 0;
+    // FIXED: Guard money_changeto_customer and default to 0
+    $data2['money_changeto_customer'] = isset($data['money_changeto_customer']) ? $data['money_changeto_customer'] : 0;
+    // FIXED: Guard vat and default to 0
+    $data2['vat'] = isset($data['vat']) ? $data['vat'] : 0;
+    // FIXED: Guard product_score_all and cast safely to float
+    $data2['product_score_all'] = isset($data['product_score_all']) ? (float) $data['product_score_all'] : 0;
     $data2['sale_runno'] = $data['sale_runno'];
     $data2['adddate'] = $data['adddate'];
-	$data2['savedate'] = $data['savedate'];
+    $data2['savedate'] = $data['savedate'];
 
-    $data2['sale_type'] = $data['sale_type'];
-    $data2['pay_type'] = $data['pay_type'];
-    $data2['reserv'] = $data['reserv'];
-    $data2['discount_last'] = $data['discount_last'];
+    // FIXED: Normalize and validate sale_type ('1' = ບິນຍ່ອຍ, '2' = ບິນສົ່ງ); fallback to '1' only if missing/invalid
+    $raw_sale_type = isset($data['sale_type']) ? trim((string) $data['sale_type']) : '';
+    $data2['sale_type'] = ($raw_sale_type === '1' || $raw_sale_type === '2') ? $raw_sale_type : '1';
 
-$data2['owner_id'] = $_SESSION['owner_id'];
-$data2['user_id'] = $_SESSION['user_id'];
-$data2['store_id'] = $_SESSION['store_id'];
-$data2['shift_id'] = $_SESSION['shift_id'];
-$data2['branch_id'] = $_SESSION['branch_id'];
+    // FIXED: Guard pay_type when missing
+    $data2['pay_type'] = isset($data['pay_type']) ? $data['pay_type'] : '';
+    // FIXED: Guard reserv with default '0'
+    $data2['reserv'] = isset($data['reserv']) ? $data['reserv'] : '0';
+    // FIXED: Guard discount_last and default to 0
+    $data2['discount_last'] = isset($data['discount_last']) ? $data['discount_last'] : 0;
 
-$data2['number_for_cus'] = $data['number_for_cus'];
+    $data2['owner_id'] = $_SESSION['owner_id'];
+    $data2['user_id'] = $_SESSION['user_id'];
+    $data2['store_id'] = $_SESSION['store_id'];
+    $data2['shift_id'] = $_SESSION['shift_id'];
+    $data2['branch_id'] = $_SESSION['branch_id'];
 
-$this->db->insert("sale_list_header", $data2);
+    // FIXED: Guard number_for_cus when missing
+    $data2['number_for_cus'] = isset($data['number_for_cus']) ? $data['number_for_cus'] : '';
 
-$this->db->query('UPDATE customer_owner
-    SET product_score_all=product_score_all + '.$data2['product_score_all'].' WHERE cus_id="'.$data2['cus_id'].'" and  owner_id="'.$_SESSION['owner_id'].'"');
+    $this->db->insert("sale_list_header", $data2);
 
+    // FIXED: Escaped cus_id and owner_id to prevent SQL syntax/injection issues
+    $this->db->query('UPDATE customer_owner
+        SET product_score_all = product_score_all + ' . $data2['product_score_all'] . '
+        WHERE cus_id = "' . $this->db->escape_str($data2['cus_id']) . '"
+        AND owner_id = "' . $this->db->escape_str($_SESSION['owner_id']) . '"');
 
+    // FIXED: Used numeric + 1 and escaped branch_id
     $this->db->query('UPDATE branch
-        SET number_for_cus=number_for_cus + "1" WHERE branch_id="'.$_SESSION['branch_id'].'"');
+        SET number_for_cus = number_for_cus + 1
+        WHERE branch_id = "' . $this->db->escape_str($_SESSION['branch_id']) . '"');
 
+    // FIXED: Escaped sale_runno and adddate in DELETE query
+    $this->db->query('DELETE FROM sale_list_datail
+        WHERE sale_runno = "' . $this->db->escape_str($data['sale_runno']) . '"
+        AND adddate != "' . $this->db->escape_str($data['adddate']) . '"');
 
-        $dlsd = $this->db->query('DELETE FROM sale_list_datail
-          WHERE sale_runno="'.$data['sale_runno'].'"
-        AND adddate!="'.$data['adddate'].'"
-          ');
+    // delete all from showcus2mer
+    // FIXED: Escaped user_id in DELETE query
+    $this->db->query('DELETE FROM sale_list_cus2mer WHERE user_id = "' . $this->db->escape_str($_SESSION['user_id']) . '"');
 
-//delete all from showcus2mer
-$this->db->query('DELETE FROM sale_list_cus2mer WHERE user_id="'.$_SESSION['user_id'].'"');
+    // FIXED: Checked isset($data['round_money']) before strict empty check
+    if (isset($data['round_money']) && $data['round_money'] !== '') {
+        $data_round['sale_runno'] = $data['sale_runno'];
+        $data_round['round_money'] = $data['round_money'];
+        // FIXED: Guarded round_money_is when missing
+        $data_round['round_money_is'] = isset($data['round_money_is']) ? $data['round_money_is'] : '';
+        $this->db->insert("log_round", $data_round);
+    }
 
+    // FIXED: Also skip when cus_id is empty string ''
+    if ($data2['cus_id'] != '0' && $data2['cus_id'] !== '') {
+        // FIXED: Added LIMIT 1 since only the latest rule ($data_mpr[0]) is used
+        $query_mpr = $this->db->query('SELECT * FROM money_to_point_rule ORDER BY id DESC LIMIT 1');
+        $data_mpr = $query_mpr->result_array();
 
-if($data['round_money'] !=''){
-$data_round['sale_runno'] = $data['sale_runno'];
-$data_round['round_money'] = $data['round_money'];
-$data_round['round_money_is'] = $data['round_money_is'];
-$this->db->insert("log_round", $data_round);
+        // FIXED: Default points to 0 and check !empty($data_mpr) before accessing index [0]
+        $cusaddpoint = 0;
+        if (!empty($data_mpr)) {
+            // FIXED: Safely read cus_money_if and point_will as float (default 0)
+            $cus_money_if = isset($data_mpr[0]['cus_money_if']) ? (float) $data_mpr[0]['cus_money_if'] : 0;
+            $point_will = isset($data_mpr[0]['point_will']) ? (float) $data_mpr[0]['point_will'] : 0;
+            // FIXED: Clamp net amount at 0 so discounts larger than sumsale_price don't yield negative points
+            $net_amount = max(0, (float) $data2['sumsale_price'] - (float) $data2['discount_last']);
+
+            // FIXED: Guard against Division by zero by checking $cus_money_if > 0 before dividing
+            if ($cus_money_if > 0 && $point_will > 0) {
+                $cusaddpoint = floor($net_amount / $cus_money_if) * $point_will;
+            }
+        }
+
+        // FIXED: Only run point UPDATE queries when earned points are greater than 0, and escape values
+        if ($cusaddpoint > 0) {
+            $points_to_add = (int) floor($cusaddpoint);
+            $this->db->query('UPDATE customer_owner
+                SET product_score_all = product_score_all + ' . $points_to_add . '
+                WHERE cus_id = "' . $this->db->escape_str($data2['cus_id']) . '"
+                AND owner_id = "' . $this->db->escape_str($_SESSION['owner_id']) . '"');
+
+            $this->db->query('UPDATE sale_list_header
+                SET product_score_all = product_score_all + ' . $points_to_add . '
+                WHERE sale_runno = "' . $this->db->escape_str($data['sale_runno']) . '"');
+        }
+    }
 }
-
-if($data2['cus_id']!='0'){
-
-$query_mpr = $this->db->query('SELECT * FROM money_to_point_rule ORDER BY id DESC');
-$data_mpr = $query_mpr->result_array();
-
-
-$cusaddpoint = (floor(($data2['sumsale_price']-$data2['discount_last'])/$data_mpr[0]['cus_money_if'])*$data_mpr[0]['point_will']);
-
-$this->db->query('UPDATE customer_owner
-    SET product_score_all=product_score_all + '.floor($cusaddpoint).'
-    WHERE cus_id="'.$data2['cus_id'].'" and  owner_id="'.$_SESSION['owner_id'].'"');
-	
-$this->db->query('UPDATE sale_list_header
-    SET product_score_all=product_score_all + '.floor($cusaddpoint).'
-    WHERE sale_runno="'.$data['sale_runno'].'"');
-
-
-}
-
-
-
-
-
-}
-
-
-
+// update 221126 ----------------------
 
 
 
@@ -1336,7 +1454,7 @@ return $json;
 
 
         $query = $this->db->query('SELECT *,
-            sh.product_score_all as product_score_all,cw.product_score_all as cus_score, from_unixtime(adddate,"%d-%m-%Y %H:%i:%s") as adddate
+            sh.product_score_all as product_score_all,sh.sale_type,cw.product_score_all as cus_score, from_unixtime(adddate,"%d-%m-%Y %H:%i:%s") as adddate
             FROM quotation_list_header as sh
             LEFT JOIN customer_owner as cw on cw.cus_id=sh.cus_id
 			WHERE sh.branch_id="'.$_SESSION['branch_id'].'"

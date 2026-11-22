@@ -143,15 +143,35 @@ return $encode_data;
 		
 
 
+// origin -----------------
 
+// public function Getone($data)
+//         {
+
+// $query = $this->db->query('SELECT sd.*, from_unixtime(sd.adddate,"%d-%m-%Y %H:%i:%s") as adddate,
+// wl.product_weight*sd.product_sale_num as product_weight
+//     FROM sale_list_datail as sd
+// 	LEFT JOIN wh_product_list as wl on wl.product_id=sd.product_id
+
+//     WHERE sd.owner_id="'.$_SESSION['owner_id'].'" AND sd.sale_runno="'.$data['sale_runno'].'"
+//     ORDER BY sd.ID ASC');
+// $encode_data = json_encode($query->result(),JSON_UNESCAPED_UNICODE );
+// return $encode_data;
+
+//         }
+
+// origin ----------------
+
+// update 221126 ----------------------
 
 public function Getone($data)
         {
 
-$query = $this->db->query('SELECT sd.*, from_unixtime(sd.adddate,"%d-%m-%Y %H:%i:%s") as adddate,
+$query = $this->db->query('SELECT sd.*,sh.sale_type, from_unixtime(sd.adddate,"%d-%m-%Y %H:%i:%s") as adddate,
 wl.product_weight*sd.product_sale_num as product_weight
     FROM sale_list_datail as sd
 	LEFT JOIN wh_product_list as wl on wl.product_id=sd.product_id
+    LEFT JOIN sale_list_header sh on sh.sale_runno=sd.sale_runno
 
     WHERE sd.owner_id="'.$_SESSION['owner_id'].'" AND sd.sale_runno="'.$data['sale_runno'].'"
     ORDER BY sd.ID ASC');
@@ -161,6 +181,7 @@ return $encode_data;
         }
 
 
+// update 221126 ----------------------
 
         public function Getonequotation($data)
                 {
