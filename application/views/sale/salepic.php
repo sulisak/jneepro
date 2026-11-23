@@ -5930,6 +5930,8 @@ if($_SESSION['owner_vat_status']=='0' || $_SESSION['owner_vat_status']=='1'){
 
                                     };
 
+                                    // original some bug with A4 printing, so we will not use it for now
+
                                     // $scope.printDivfull = function(x, sale_type) {
                                     //     var activeSaleType = sale_type || $scope.sale_type || localStorage
                                     //         .getItem('saved_sale_type') || '1';
@@ -5954,10 +5956,91 @@ if($_SESSION['owner_vat_status']=='0' || $_SESSION['owner_vat_status']=='1'){
                                     //         localStorage.setItem('saved_sale_type', newVal);
                                     //     }
                                     // });
+
                                     // add new 221126 --------------
 
+                                    //  $scope.printDivfull = function(x, sale_type) {
+                                    // 1. Resolve the bill item first so we can read item.sale_type reliably
+                                    //      var selectedItem = x || ($scope.list && $scope.list.length > 0 ?
+                                    // $scope.list[0]: null);
+                                    //     if (!selectedItem && $scope.listone) {
+                                    //         selectedItem = Array.isArray($scope.listone) ? $scope.listone[
+                                    //            0] : $scope.listone;
+                                    //    }
+
+                                    // Helper: accept only '1' or '2'
+                                    //   function normalizeSaleType(val) {
+                                    //        if (val === undefined || val === null) return '';
+                                    //        var str = String(val).trim();
+                                    //       return (str === '1' || str === '2') ? str : '';
+                                    //   }
+
+                                    // 2. Priority order: explicit sale_type arg -> selectedItem.sale_type -> $scope.sale_type -> localStorage
+                                    //     var activeSaleType =
+                                    //         normalizeSaleType(sale_type) ||
+                                    //         normalizeSaleType(selectedItem && selectedItem.sale_type) ||
+                                    //         normalizeSaleType($scope.sale_type) ||
+                                    //         normalizeSaleType(localStorage.getItem('saved_sale_type')) ||
+                                    //         '';
+
+                                    //     // 3. Sync $scope.sale_type and localStorage when valid ('1' or '2')
+                                    //     if (activeSaleType === '1' || activeSaleType === '2') {
+                                    //         $scope.sale_type = activeSaleType;
+                                    //         localStorage.setItem('saved_sale_type', activeSaleType);
+                                    //     }
+
+                                    //     // <-- PUT IT RIGHT HERE (after syncing, before Getone)
+                                    //     console.log('printDivfull resolved:', {
+                                    //         argSaleType: sale_type,
+                                    //         itemSaleType: selectedItem && selectedItem.sale_type,
+                                    //         scopeSaleType: $scope.sale_type,
+                                    //         activeSaleType: activeSaleType
+                                    //     });
+
+                                    //     // 4. Pass resolved sale_type into Getone and switch modals
+                                    //     if (selectedItem) {
+                                    //         $scope.Getone(selectedItem, activeSaleType);
+                                    //     }
+
+                                    //     $('#Openonemini').modal('hide');
+                                    //     $('#Openone').modal('show');
+                                    // };
+
+
+
+                                    // $scope.sale_type ----------------------------------------------------
+                                    // $scope.sale_type = localStorage.getItem('saved_sale_type') || '';
+
+                                    // $scope.$watch('sale_type', function(newVal) {
+                                    //     var val = (newVal !== undefined && newVal !== null) ? String(
+                                    //         newVal).trim() : '';
+                                    //     if (val === '1' || val === '2') {
+                                    //         localStorage.setItem('saved_sale_type', val);
+                                    //     }
+                                    // });
+
+                                    // end original some bug with A4 printing, so we will not use it for now
+
+                                    // fix prinDivfull 231126 bug A4 print preview --------
+
+                                    function normalizeSaleType(val) {
+                                        if (val === undefined || val === null) return '';
+                                        var str = String(val).trim();
+                                        return (str === '1' || str === '2') ? str : '';
+                                    }
+
+                                    $scope.sale_type = normalizeSaleType(localStorage.getItem(
+                                        'saved_sale_type'));
+
+                                    $scope.$watch('sale_type', function(newVal, oldVal) {
+                                        if (newVal === oldVal) return;
+                                        var val = normalizeSaleType(newVal);
+                                        if (val === '1' || val === '2') {
+                                            localStorage.setItem('saved_sale_type', val);
+                                        }
+                                    });
+
                                     $scope.printDivfull = function(x, sale_type) {
-                                        // 1. Resolve the bill item first so we can read item.sale_type reliably
                                         var selectedItem = x || ($scope.list && $scope.list.length > 0 ?
                                             $scope.list[0] : null);
                                         if (!selectedItem && $scope.listone) {
@@ -5965,28 +6048,31 @@ if($_SESSION['owner_vat_status']=='0' || $_SESSION['owner_vat_status']=='1'){
                                                 0] : $scope.listone;
                                         }
 
-                                        // Helper: accept only '1' or '2'
-                                        function normalizeSaleType(val) {
-                                            if (val === undefined || val === null) return '';
-                                            var str = String(val).trim();
-                                            return (str === '1' || str === '2') ? str : '';
-                                        }
-
-                                        // 2. Priority order: explicit sale_type arg -> selectedItem.sale_type -> $scope.sale_type -> localStorage
+                                        // Follow selectedItem.sale_type first when valid ('1' or '2')
                                         var activeSaleType =
-                                            normalizeSaleType(sale_type) ||
                                             normalizeSaleType(selectedItem && selectedItem.sale_type) ||
+                                            normalizeSaleType(sale_type) ||
                                             normalizeSaleType($scope.sale_type) ||
                                             normalizeSaleType(localStorage.getItem('saved_sale_type')) ||
                                             '';
 
-                                        // 3. Sync $scope.sale_type and localStorage when valid ('1' or '2')
                                         if (activeSaleType === '1' || activeSaleType === '2') {
                                             $scope.sale_type = activeSaleType;
                                             localStorage.setItem('saved_sale_type', activeSaleType);
                                         }
 
-                                        // 4. Pass resolved sale_type into Getone and switch modals
+                                        // <-- PUT IT RIGHT HERE (after syncing, before Getone)
+                                        console.log('printDivfull resolved:', {
+                                            argSaleType: sale_type,
+                                            itemSaleType: selectedItem && selectedItem.sale_type,
+                                            scopeSaleType: $scope.sale_type,
+                                            activeSaleType: activeSaleType
+                                        });
+                                        console.log('printDivfull raw args:', {
+                                            x: x,
+                                            sale_type: sale_type
+                                        });
+
                                         if (selectedItem) {
                                             $scope.Getone(selectedItem, activeSaleType);
                                         }
@@ -5995,19 +6081,20 @@ if($_SESSION['owner_vat_status']=='0' || $_SESSION['owner_vat_status']=='1'){
                                         $('#Openone').modal('show');
                                     };
 
-
-
                                     // $scope.sale_type ----------------------------------------------------
-                                    $scope.sale_type = localStorage.getItem('saved_sale_type') || '';
+                                    $scope.sale_type = normalizeSaleType(localStorage.getItem(
+                                        'saved_sale_type'));
 
-                                    $scope.$watch('sale_type', function(newVal) {
-                                        var val = (newVal !== undefined && newVal !== null) ? String(
-                                            newVal).trim() : '';
+                                    $scope.$watch('sale_type', function(newVal, oldVal) {
+                                        if (newVal === oldVal) return;
+                                        var val = normalizeSaleType(newVal);
                                         if (val === '1' || val === '2') {
                                             localStorage.setItem('saved_sale_type', val);
                                         }
                                     });
-                                    // add new 221126 --------------
+
+                                    // fix prinDivfull 231126 bug A4 print preview --------
+
 
 
 
@@ -6154,7 +6241,8 @@ if($_SESSION['owner_vat_status']=='0' || $_SESSION['owner_vat_status']=='1'){
 
 
                                     $scope.customer_group_discountpercent = false;
-                                    $scope.Selectcustomer = function(x) {
+                                    $scope.Selectcustomer = function(
+                                        x) {
 
 
                                         $scope.customer_id = x.cus_id;
@@ -7085,46 +7173,15 @@ if($_SESSION['owner_vat_status']=='0' || $_SESSION['owner_vat_status']=='1'){
                                     //  savesale =========================================================================
                                     $scope.saleremark = '';
                                     $scope.showremarkonslip = '0';
-                                    $scope.Savesale = function(changemoney, sumsalepricevat, discount_last) {
+                                    $scope.Savesale =
+                                        function(changemoney, sumsalepricevat, discount_last) {
 
 
-                                        if ($scope.morepaykey == '1') {
-                                            $scope.money_from_customer = $scope.Summorepaymoney();
-                                        }
+                                            if ($scope.morepaykey == '1') {
+                                                $scope.money_from_customer = $scope.Summorepaymoney();
+                                            }
 
 
-
-                                        if ($scope.discount_last_percent != 0) {
-                                            $scope.discount_last = ($scope.Sumsaleprice() + ($scope
-                                                .Sumsaleprice() * $scope.vatnumber / 100)) * ($scope
-                                                .discount_last_percent / 100);
-                                        }
-
-                                        if ($scope.listsale == '' || $scope.listsale[0].product_id ===
-                                            null) {
-
-                                            console.log("Product ID:", $scope.listsale[0]
-                                                ?.product_id); // Log product_id
-                                            console.log("Full listsale:", $scope
-                                                .listsale); // Log full object for debugging
-
-
-                                            toastr.warning('<?=$lang_addproductlistplz?>');
-                                        } else if ($scope.money_from_customer == '') {
-                                            //toastr.warning('<?=$lang_getmoneyplz?>');
-                                        } else if ($scope.pay_type != '4' && $scope.money_from_customer <
-                                            $scope.Sumsalepricevat() - $scope.discount_last) {
-                                            console.log($scope.Sumsalepricevat);
-                                            toastr.warning('<?=$lang_getmoneymoreplz?>');
-                                        } else if ($scope.pay_type == '4' && $scope.money_from_customer >
-                                            $scope.Sumsalepricevat() - $scope.discount_last) {
-                                            toastr.warning('<?=$lang_getmoneyplz?>');
-                                        } else if (isNaN($scope.money_from_customer) == true) {
-                                            toastr.warning('<?=$lang_getmoneynumberplz?>');
-                                        } else if ($scope.money_from_customer - $scope.Sumsalepricevat() >=
-                                            100000000000000000000000000) {
-                                            toastr.warning('<?=$lang_moneychangenotmore1000?>');
-                                        } else {
 
                                             if ($scope.discount_last_percent != 0) {
                                                 $scope.discount_last = ($scope.Sumsaleprice() + ($scope
@@ -7132,109 +7189,141 @@ if($_SESSION['owner_vat_status']=='0' || $_SESSION['owner_vat_status']=='1'){
                                                     .discount_last_percent / 100);
                                             }
 
-                                            toastr.info('<?=$lang_saving?>');
+                                            if ($scope.listsale == '' || $scope.listsale[0].product_id ===
+                                                null) {
 
-                                            $http.post("Salepage/cususepoint", {
-                                                customer_usepoint: $scope.customer_usepoint,
-                                                cus_id: $scope.customer_id
-                                            }).success(function(data) {
-
-                                            });
-
-                                            $('#savesalemorepay').prop('disabled', true);
-                                            $('#savesale').prop('disabled', true);
-                                            $('#savesale2').prop('disabled', true);
-                                            $('#money_from_customer').prop('disabled', true);
-                                            $('#money_from_customer2').prop('disabled', true);
-                                            $http.post("Salepage/Savesale", {
-                                                    listsale: $scope.listsale,
-                                                    cus_name: $scope.customer_name,
-                                                    cus_id: $scope.customer_id,
-                                                    cus_address_all: $scope.cus_address_all,
-                                                    sumsale_discount: $scope.Sumsalediscount(),
-                                                    sumsale_num: $scope.Sumsalenum(),
-                                                    vat: $scope.vatnumber,
-                                                    product_score_all: $scope.Sumproduct_score(),
-                                                    sumsale_price: $scope.Sumsaleprice(),
-                                                    money_from_customer: $scope.money_from_customer,
-                                                    money_changeto_customer: $scope
-                                                        .money_from_customer - ($scope
-                                                            .Sumsalepricevat() - $scope.discount_last),
-                                                    sale_type: $scope.sale_type,
-                                                    pay_type: $scope.pay_type,
-                                                    pay_type_list: $scope.pay_type_list,
-                                                    morepaykey: $scope.morepaykey,
-                                                    saleremark: $scope.saleremark,
-                                                    round_money: $scope.round_money,
-                                                    round_money_is: $scope.round_money_is,
-                                                    showremarkonslip: $scope.showremarkonslip,
-                                                    reserv: $scope.reserv,
-                                                    saledate: $scope.saledate,
-                                                    discount_last: $scope.discount_last,
-                                                    shift_id: '<?php if(isset($_SESSION['shift_id'])){ echo $_SESSION['shift_id']; }?>'
-                                                }).then(function(response) {
-                                                    // Telegram alert is already sent inside Savesale()
-                                                    console.log("Telegram alert sent, data:", response
-                                                        .data);
+                                                console.log("Product ID:", $scope.listsale[0]
+                                                    ?.product_id); // Log product_id
+                                                console.log("Full listsale:", $scope
+                                                    .listsale); // Log full object for debugging
 
 
+                                                toastr.warning('<?=$lang_addproductlistplz?>');
+                                            } else if ($scope.money_from_customer == '') {
+                                                //toastr.warning('<?=$lang_getmoneyplz?>');
+                                            } else if ($scope.pay_type != '4' && $scope.money_from_customer <
+                                                $scope.Sumsalepricevat() - $scope.discount_last) {
+                                                console.log($scope.Sumsalepricevat);
+                                                toastr.warning('<?=$lang_getmoneymoreplz?>');
+                                            } else if ($scope.pay_type == '4' && $scope.money_from_customer >
+                                                $scope.Sumsalepricevat() - $scope.discount_last) {
+                                                toastr.warning('<?=$lang_getmoneyplz?>');
+                                            } else if (isNaN($scope.money_from_customer) == true) {
+                                                toastr.warning('<?=$lang_getmoneynumberplz?>');
+                                            } else if ($scope.money_from_customer - $scope.Sumsalepricevat() >=
+                                                100000000000000000000000000) {
+                                                toastr.warning('<?=$lang_moneychangenotmore1000?>');
+                                            } else {
 
-                                                    // Reset UI elements
-                                                    $scope.morepaykey = '0';
-                                                    $('#morepay').modal('hide');
-                                                    $scope.saleremark = '';
+                                                if ($scope.discount_last_percent != 0) {
+                                                    $scope.discount_last = ($scope.Sumsaleprice() + ($scope
+                                                        .Sumsaleprice() * $scope.vatnumber / 100)) * ($scope
+                                                        .discount_last_percent / 100);
+                                                }
 
-                                                    if ($scope.pay_type == '1' || $scope.pay_type ==
-                                                        '4') {
-                                                        $.ajax({
-                                                            url: '<?php echo $base_url_local;?>/printer/example/interface/lan.php',
-                                                            data: {
-                                                                printer_ul: "1",
-                                                                printer_name: "XP-58",
-                                                            },
-                                                            type: 'post',
-                                                            success: function(response) {}
-                                                        });
-                                                    }
+                                                toastr.info('<?=$lang_saving?>');
 
-                                                    $('#Opengetmoneymodal').modal('hide');
-                                                    toastr.success('<?=$lang_savingsuccess?>');
+                                                $http.post("Salepage/cususepoint", {
+                                                    customer_usepoint: $scope.customer_usepoint,
+                                                    cus_id: $scope.customer_id
+                                                }).success(function(data) {
 
-                                                    $scope.changemoney = $scope.money_from_customer - (
-                                                        $scope.Sumsalepricevat() - $scope
-                                                        .discount_last);
-
-                                                    $('#savesalemorepay').prop('disabled', false);
-                                                    $('#Openchangemoney').modal({
-                                                        backdrop: "static",
-                                                        keyboard: false
-                                                    });
-                                                    $('#savesale').prop('disabled', false);
-                                                    $('#savesale2').prop('disabled', false);
-                                                    $('#money_from_customer').prop('disabled', false);
-                                                    $('#money_from_customer2').prop('disabled', false);
-
-                                                    $scope.Refresh();
-
-                                                    if ($scope.print_preview == 0) {
-                                                        $scope.getlist();
-                                                        $scope.getproductlist();
-                                                    } else {
-                                                        // $scope.getlist('', '', '', 'printmini');
-                                                        $scope.getlist();
-                                                    }
-
-                                                    $scope.listsale = [];
-                                                    $scope.money_from_customer = '';
-                                                    $scope.is_enter = true;
-
-                                                })
-                                                .catch(function(error) {
-                                                    console.error("Error saving sale:", error);
                                                 });
-                                        }
 
-                                    };
+                                                $('#savesalemorepay').prop('disabled', true);
+                                                $('#savesale').prop('disabled', true);
+                                                $('#savesale2').prop('disabled', true);
+                                                $('#money_from_customer').prop('disabled', true);
+                                                $('#money_from_customer2').prop('disabled', true);
+                                                $http.post("Salepage/Savesale", {
+                                                        listsale: $scope.listsale,
+                                                        cus_name: $scope.customer_name,
+                                                        cus_id: $scope.customer_id,
+                                                        cus_address_all: $scope.cus_address_all,
+                                                        sumsale_discount: $scope.Sumsalediscount(),
+                                                        sumsale_num: $scope.Sumsalenum(),
+                                                        vat: $scope.vatnumber,
+                                                        product_score_all: $scope.Sumproduct_score(),
+                                                        sumsale_price: $scope.Sumsaleprice(),
+                                                        money_from_customer: $scope.money_from_customer,
+                                                        money_changeto_customer: $scope
+                                                            .money_from_customer - ($scope
+                                                                .Sumsalepricevat() - $scope.discount_last),
+                                                        sale_type: $scope.sale_type,
+                                                        pay_type: $scope.pay_type,
+                                                        pay_type_list: $scope.pay_type_list,
+                                                        morepaykey: $scope.morepaykey,
+                                                        saleremark: $scope.saleremark,
+                                                        round_money: $scope.round_money,
+                                                        round_money_is: $scope.round_money_is,
+                                                        showremarkonslip: $scope.showremarkonslip,
+                                                        reserv: $scope.reserv,
+                                                        saledate: $scope.saledate,
+                                                        discount_last: $scope.discount_last,
+                                                        shift_id: '<?php if(isset($_SESSION['shift_id'])){ echo $_SESSION['shift_id']; }?>'
+                                                    }).then(function(response) {
+                                                        // Telegram alert is already sent inside Savesale()
+                                                        console.log("Telegram alert sent, data:", response
+                                                            .data);
+
+
+
+                                                        // Reset UI elements
+                                                        $scope.morepaykey = '0';
+                                                        $('#morepay').modal('hide');
+                                                        $scope.saleremark = '';
+
+                                                        if ($scope.pay_type == '1' || $scope.pay_type ==
+                                                            '4') {
+                                                            $.ajax({
+                                                                url: '<?php echo $base_url_local;?>/printer/example/interface/lan.php',
+                                                                data: {
+                                                                    printer_ul: "1",
+                                                                    printer_name: "XP-58",
+                                                                },
+                                                                type: 'post',
+                                                                success: function(response) {}
+                                                            });
+                                                        }
+
+                                                        $('#Opengetmoneymodal').modal('hide');
+                                                        toastr.success('<?=$lang_savingsuccess?>');
+
+                                                        $scope.changemoney = $scope.money_from_customer - (
+                                                            $scope.Sumsalepricevat() - $scope
+                                                            .discount_last);
+
+                                                        $('#savesalemorepay').prop('disabled', false);
+                                                        $('#Openchangemoney').modal({
+                                                            backdrop: "static",
+                                                            keyboard: false
+                                                        });
+                                                        $('#savesale').prop('disabled', false);
+                                                        $('#savesale2').prop('disabled', false);
+                                                        $('#money_from_customer').prop('disabled', false);
+                                                        $('#money_from_customer2').prop('disabled', false);
+
+                                                        $scope.Refresh();
+
+                                                        if ($scope.print_preview == 0) {
+                                                            $scope.getlist();
+                                                            $scope.getproductlist();
+                                                        } else {
+                                                            // $scope.getlist('', '', '', 'printmini');
+                                                            $scope.getlist();
+                                                        }
+
+                                                        $scope.listsale = [];
+                                                        $scope.money_from_customer = '';
+                                                        $scope.is_enter = true;
+
+                                                    })
+                                                    .catch(function(error) {
+                                                        console.error("Error saving sale:", error);
+                                                    });
+                                            }
+
+                                        };
 
                                     //  savesale =========================================================================
 
@@ -7620,20 +7709,21 @@ if($_SESSION['owner_vat_status']=='0' || $_SESSION['owner_vat_status']=='1'){
                                     //start ค้นหาสินค้าทั้งหมด
                                     $scope.searchtextarray = [];
                                     $scope.searchtextarray2 = [];
-                                    $scope.pregetlist = function() {
-                                        $scope.searchtextarray.push($scope.product_name_search);
-                                        setTimeout(function() {
-                                            $scope.searchtextarray2.push($scope
-                                                .product_name_search);
-                                            if ($scope.searchtextarray2[0] == $scope
-                                                .searchtextarray[$scope.searchtextarray.length - 1]
-                                            ) {
-                                                $scope.searchproductlist();
-                                            }
-                                            $scope.searchtextarray = [];
-                                            $scope.searchtextarray2 = [];
-                                        }, 1000);
-                                    }
+                                    $scope.pregetlist =
+                                        function() {
+                                            $scope.searchtextarray.push($scope.product_name_search);
+                                            setTimeout(function() {
+                                                $scope.searchtextarray2.push($scope
+                                                    .product_name_search);
+                                                if ($scope.searchtextarray2[0] == $scope
+                                                    .searchtextarray[$scope.searchtextarray.length - 1]
+                                                ) {
+                                                    $scope.searchproductlist();
+                                                }
+                                                $scope.searchtextarray = [];
+                                                $scope.searchtextarray2 = [];
+                                            }, 1000);
+                                        }
                                     //end ค้นหาสินค้าทั้งหมด
 
 
@@ -7643,20 +7733,21 @@ if($_SESSION['owner_vat_status']=='0' || $_SESSION['owner_vat_status']=='1'){
                                     //start ค้นหาลูกค้า
                                     $scope.csearchtextarray = [];
                                     $scope.csearchtextarray2 = [];
-                                    $scope.pregetlistcus = function() {
-                                        $scope.csearchtextarray.push($scope.search_customer_name);
-                                        setTimeout(function() {
-                                            $scope.csearchtextarray2.push($scope
-                                                .search_customer_name);
-                                            if ($scope.csearchtextarray2[0] == $scope
-                                                .csearchtextarray[$scope.csearchtextarray.length -
-                                                    1]) {
-                                                $scope.Searchcustomer();
-                                            }
-                                            $scope.csearchtextarray = [];
-                                            $scope.csearchtextarray2 = [];
-                                        }, 1000);
-                                    }
+                                    $scope
+                                        .pregetlistcus = function() {
+                                            $scope.csearchtextarray.push($scope.search_customer_name);
+                                            setTimeout(function() {
+                                                $scope.csearchtextarray2.push($scope
+                                                    .search_customer_name);
+                                                if ($scope.csearchtextarray2[0] == $scope
+                                                    .csearchtextarray[$scope.csearchtextarray.length -
+                                                        1]) {
+                                                    $scope.Searchcustomer();
+                                                }
+                                                $scope.csearchtextarray = [];
+                                                $scope.csearchtextarray2 = [];
+                                            }, 1000);
+                                        }
                                     //end ค้นหาลูกค้า
 
 
