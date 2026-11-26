@@ -266,7 +266,7 @@ body {
 
 
 
-           <!-- product date end  -->
+            <!-- product date end  -->
             <div class="col-md-6">
                 <a style="text-decoration:none;" href="<?php echo $base_url;?>/warehouse/dateend"
                     title="<?=$lang_clickthisalllist?>">
@@ -305,7 +305,7 @@ body {
             <!-- ===== product date end  ==============-->
 
             <!-- ===== 2-MONTH EXPIRATION POPUP MODAL ============== -->
-            <div class="modal fade" id="Product_date_end_noti_modal" tabindex="-1" role="dialog"
+            <!-- <div class="modal fade" id="Product_date_end_noti_modal" tabindex="-1" role="dialog"
                 aria-labelledby="expiryModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
@@ -357,6 +357,50 @@ body {
                                     close
                                 </button>
                             </center>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+
+            <div id="Product_date_end_noti_modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Near Expiry Products (Within 2 Months)</h4>
+                            <button type="button" class="close" ng-click="closeExpiryModal()" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Code</th>
+                                            <th>Product Name</th>
+                                            <th>Lot No</th>
+                                            <th>Stock</th>
+                                            <th>Expiry Date</th>
+                                            <th>Days Left</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="x in nearExpiryList track by $index">
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ x.product_code }}</td>
+                                            <td>{{ x.product_name }}</td>
+                                            <td>{{ x.lotno }}</td>
+                                            <td>{{ x.product_stock_num }}</td>
+                                            <td>{{ x.date_end || x.date_end2 }}</td>
+                                            <td>{{ x.days_left }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" ng-click="closeExpiryModal()">Close</button>
                         </div>
                     </div>
                 </div>
@@ -1283,29 +1327,29 @@ app.controller('Index', function($scope, $http, $location) {
     // $scope.Saletoday();
 
 
-  
-
-	$scope.get_product_value = function() {
-    $http.get('sale/product_value/Getstock')
-        .then(function(response) {
-            console.log("Getstock response:", response.data);
-            $scope.product_value_list = response.data;
-        });
-};
-$scope.get_product_value();
 
 
+    $scope.get_product_value = function() {
+        $http.get('sale/product_value/Getstock')
+            .then(function(response) {
+                console.log("Getstock response:", response.data);
+                $scope.product_value_list = response.data;
+            });
+    };
+    $scope.get_product_value();
 
-	 // $scope.Productstockless = function() {
 
-  //       $http.get('Home/Getstockless')
-  //           .then(function(response) {
-  //               console.log("Productstockless response:", response.data); // debug
-  //               $scope.productstockless = response.data;
 
-  //           });
-  //   };
-  //   $scope.Productstockless();
+    // $scope.Productstockless = function() {
+
+    //       $http.get('Home/Getstockless')
+    //           .then(function(response) {
+    //               console.log("Productstockless response:", response.data); // debug
+    //               $scope.productstockless = response.data;
+
+    //           });
+    //   };
+    //   $scope.Productstockless();
 
 
     // ==============================================
@@ -1398,26 +1442,64 @@ $scope.get_product_value();
         $('#Delall_product').modal('show');
     };
 
-	// NEW: 2-Month Product Expiration Alert & Popup
-
-    var TWO_MONTHS_SECONDS = 60 * 24 * 60 * 60; // 60 days in seconds
+    // NEW: 2-Month Product Expiration Alert & Popup
 
     $scope.nearExpiryList = [];
     $scope.showExpiryModal = false;
 
+    function parseExpiryToSeconds(val) {
+        if (val === null || val === undefined || val === '' || val === '0') {
+            return NaN;
+        }
+
+        var str = String(val).trim();
+        if (/^\d+$/.test(str)) {
+            var num = Number(str);
+            return num > 9999999999 ? Math.floor(num / 1000) : num;
+        }
+
+        var ms = Date.parse(str);
+        return isNaN(ms) ? NaN : Math.floor(ms / 1000);
+    }
+
+    function getTwoMonthsLaterSeconds(nowSec) {
+        var d = new Date(nowSec * 1000);
+        d.setMonth(d.getMonth() + 2);
+        return Math.floor(d.getTime() / 1000);
+    }
+
     $scope.getDaysLeft = function(dateEnd2) {
-        var endSec = Number(dateEnd2);
-        if (!endSec) return 0;
+        var endSec = parseExpiryToSeconds(dateEnd2);
+        if (isNaN(endSec)) return 0;
+
         var nowSec = Math.floor(Date.now() / 1000);
         return Math.max(0, Math.ceil((endSec - nowSec) / 86400));
     };
 
     $scope.isWithinTwoMonths = function(item) {
-        if (!item || !item.date_end2) return false;
+        if (!item) return false;
+
+        var stockNum = Number(item.product_stock_num);
+        var endSec = parseExpiryToSeconds(item.date_end2 || item.date_end);
         var nowSec = Math.floor(Date.now() / 1000);
-        var endSec = Number(item.date_end2);
-        if (!endSec) return false;
-        return endSec > nowSec && (endSec - nowSec) <= TWO_MONTHS_SECONDS;
+        var twoMonthsSec = getTwoMonthsLaterSeconds(nowSec);
+
+        var passStock = !isNaN(stockNum) && stockNum > 0;
+        var passDate = !isNaN(endSec) && endSec > nowSec && endSec <= twoMonthsSec;
+
+        console.log('[ExpiryModal] check item:', {
+            code: item.product_code,
+            stock: item.product_stock_num,
+            date_end2: item.date_end2,
+            date_end: item.date_end,
+            endSec: endSec,
+            nowSec: nowSec,
+            twoMonthsSec: twoMonthsSec,
+            passStock: passStock,
+            passDate: passDate
+        });
+
+        return passStock && passDate;
     };
 
     $scope.openExpiryModal = function() {
@@ -1470,7 +1552,7 @@ $scope.get_product_value();
 
                 var items = Array.isArray(response.data) ? response.data : [];
                 $scope.nearExpiryList = items.filter($scope.isWithinTwoMonths).map(function(item) {
-                    item.days_left = $scope.getDaysLeft(item.date_end2);
+                    item.days_left = $scope.getDaysLeft(item.date_end2 || item.date_end);
                     return item;
                 });
 

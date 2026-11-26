@@ -206,10 +206,11 @@ where owner_id = "'.$_SESSION['owner_id'].'" AND sale_runno="'.$data['sale_runno
         $query = $this->db->query('SELECT sd.*, 
 from_unixtime(sd.adddate,"%d-%m-%Y %H:%i:%s") as adddate,
 IFNULL(wu.product_unit_name,"") as product_unit_name,
-wl.product_weight*sd.product_sale_num as product_weight
+wl.product_weight*sd.product_sale_num as product_weight,sh.sale_type
             FROM quotation_list_datail as sd
 LEFT JOIN wh_product_list as wl on wl.product_id=sd.product_id
 LEFT JOIN wh_product_unit as wu on wu.product_unit_id=wl.product_unit_id
+LEFT JOIN quotation_list_header sh on sh.sale_runno=sd.sale_runno
 
             WHERE sd.owner_id="'.$_SESSION['owner_id'].'" AND sd.sale_runno="'.$data['sale_runno'].'"
             ORDER BY sd.ID ASC');

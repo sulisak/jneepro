@@ -53,21 +53,45 @@ echo $list = $this->dateend_model->Getstock($data);
 
 }
 
+	// public function NearExpiry()
+    // {
+    //     try {
+    //     $json = $this->dateend_model->GetNearExpiry();
+    // } catch (Throwable $e) {
+    //     log_message('error', 'NearExpiry error: ' . $e->getMessage());
+    //     $json = json_encode(array(), JSON_UNESCAPED_UNICODE);
+    // }
+
+    // $this->output
+    //     ->set_content_type('application/json', 'utf-8')
+    //     ->set_header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0')
+    //     ->set_header('Pragma: no-cache')
+    //     ->set_output($json);
+    // }
+
+
 	public function NearExpiry()
-    {
-        try {
+{
+    $rows = array();
+
+    try {
         $json = $this->dateend_model->GetNearExpiry();
-    } catch (Throwable $e) {
+        $decoded = json_decode($json, true);
+
+        if (is_array($decoded)) {
+            $rows = $decoded;
+        }
+    } catch (\Throwable $e) {
         log_message('error', 'NearExpiry error: ' . $e->getMessage());
-        $json = json_encode(array(), JSON_UNESCAPED_UNICODE);
+        $this->output->set_status_header(500);
     }
 
     $this->output
         ->set_content_type('application/json', 'utf-8')
         ->set_header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0')
         ->set_header('Pragma: no-cache')
-        ->set_output($json);
-    }
+        ->set_output(json_encode($rows, JSON_UNESCAPED_UNICODE));
+}
 
 
 

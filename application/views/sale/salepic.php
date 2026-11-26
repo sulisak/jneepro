@@ -515,7 +515,7 @@ else {
                                     <!-- add new 221126 -------------------->
                                     <tr>
                                         <td
-                                            style="text-align: center; font-family: 'Phetsarath OT', sans-serif; color: #000;">
+                                            style="text-align: center; font-family: 'Phetsarath OT', sans-serif; color: #000;font-size:24px;">
                                             <span ng-if="sale_type == 1 || sale_type == '1'" class="label label-warning"
                                                 style="color: #000;">ບິນຍ່ອຍ</span>
                                             <span ng-if="sale_type == 2 || sale_type == '2'" class="label label-success"
@@ -1175,7 +1175,7 @@ if($_SESSION['owner_vat_status']=='2'){
 
                                                     <!-- add new 221126  -->
                                                     <td
-                                                        style="text-align: center; font-family: 'Phetsarath OT', sans-serif; color: black;">
+                                                        style="text-align: center; font-family: 'Phetsarath OT', sans-serif; color: black;font-size:24px;">
                                                         <span ng-if="x.sale_type == 1 || x.sale_type == '1'"
                                                             class="label label-warning"
                                                             style="color: #000;">ບິນຍ່ອຍ</span>
@@ -2248,11 +2248,22 @@ pregetlistcus()" class="form-control" placeholder="<?php echo $lang_sp_42;?>"
                                 <center>
 
                                     <span ng-if="quotation_type=='1'" style="font-size: 20px;font-weight: bold;">
-                                        <?php echo $lang_sp_68;?>
+                                        ໃບສະເໜີລາຄາ/ໃບແຈ້ງໜີ້
                                     </span>
+                                    <!-- add new 241126 -->
+                                    <span ng-switch="sale_type + ''">
+                                        <span ng-switch-when="1"
+                                            style="color: #000;font-size: 20px;font-weight: bold;">(ບິນຂາຍຍ່ອຍ)</span>
+                                        <span ng-switch-when="2"
+                                            style="color: #000;font-size: 20px;font-weight: bold;">(ບິນຂາຍສົ່ງ)</span>
+                                        <span ng-switch-default style="color: #000;">-</span>
+                                    </span>
+                                    <!-- add new 241126 -->
+
+
 
                                     <span ng-if="quotation_type=='2'" style="font-size: 20px;font-weight: bold;">
-                                        <?php echo $lang_sp_69;?>
+                                        ໃບສົ່ງສິນຄ້າ
                                     </span>
 
 
@@ -8071,6 +8082,8 @@ if($_SESSION['owner_vat_status']=='0' || $_SESSION['owner_vat_status']=='1'){
                                             $scope.pay_type = x.pay_type;
                                             $scope.number_for_cus = x.number_for_cus;
                                             $scope.taxnumber = x.taxnumber;
+                                            $scope.sale_type = x.sale_type;
+                                            console.log("sale_type:", $scope.sale_type);
                                         });
 
                                         setTimeout(function() {
