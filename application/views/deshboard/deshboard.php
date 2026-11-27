@@ -305,7 +305,7 @@ body {
             <!-- ===== product date end  ==============-->
 
             <!-- ===== 2-MONTH EXPIRATION POPUP MODAL ============== -->
-            <!-- <div class="modal fade" id="Product_date_end_noti_modal" tabindex="-1" role="dialog"
+            <div class="modal fade" id="Product_date_end_noti_modal" tabindex="-1" role="dialog"
                 aria-labelledby="expiryModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
@@ -357,50 +357,6 @@ body {
                                     close
                                 </button>
                             </center>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
-
-            <div id="Product_date_end_noti_modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-dialog modal-lg" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title">Near Expiry Products (Within 2 Months)</h4>
-                            <button type="button" class="close" ng-click="closeExpiryModal()" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Code</th>
-                                            <th>Product Name</th>
-                                            <th>Lot No</th>
-                                            <th>Stock</th>
-                                            <th>Expiry Date</th>
-                                            <th>Days Left</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr ng-repeat="x in nearExpiryList track by $index">
-                                            <td>{{ $index + 1 }}</td>
-                                            <td>{{ x.product_code }}</td>
-                                            <td>{{ x.product_name }}</td>
-                                            <td>{{ x.lotno }}</td>
-                                            <td>{{ x.product_stock_num }}</td>
-                                            <td>{{ x.date_end || x.date_end2 }}</td>
-                                            <td>{{ x.days_left }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" ng-click="closeExpiryModal()">Close</button>
                         </div>
                     </div>
                 </div>
@@ -1444,99 +1400,63 @@ app.controller('Index', function($scope, $http, $location) {
 
     // NEW: 2-Month Product Expiration Alert & Popup
 
-    $scope.nearExpiryList = [];
-    $scope.showExpiryModal = false;
+    var TWO_MONTHS_SECONDS = 60 * 24 * 60 * 60; // 5184000 seconds (60 days)
 
-    function parseExpiryToSeconds(val) {
-        if (val === null || val === undefined || val === '' || val === '0') {
+    $scope.nearExpiryList = [];
+
+    $scope.parseUnixSeconds = function(val) {
+        if (val === null || val === undefined || val === '') {
             return NaN;
         }
 
-        var str = String(val).trim();
-        if (/^\d+$/.test(str)) {
-            var num = Number(str);
-            return num > 9999999999 ? Math.floor(num / 1000) : num;
+        if (typeof val === 'string') {
+            var match = val.trim().match(/^(\d{2})-(\d{2})-(\d{4})$/);
+            if (match) {
+                var day = Number(match[1]);
+                var month = Number(match[2]) - 1;
+                var year = Number(match[3]);
+                return Math.floor(new Date(year, month, day).getTime() / 1000);
+            }
         }
 
-        var ms = Date.parse(str);
-        return isNaN(ms) ? NaN : Math.floor(ms / 1000);
-    }
-
-    function getTwoMonthsLaterSeconds(nowSec) {
-        var d = new Date(nowSec * 1000);
-        d.setMonth(d.getMonth() + 2);
-        return Math.floor(d.getTime() / 1000);
-    }
-
-    $scope.getDaysLeft = function(dateEnd2) {
-        var endSec = parseExpiryToSeconds(dateEnd2);
-        if (isNaN(endSec)) return 0;
-
-        var nowSec = Math.floor(Date.now() / 1000);
-        return Math.max(0, Math.ceil((endSec - nowSec) / 86400));
+        var num = Number(val);
+        if (!isFinite(num) || num <= 0) {
+            return NaN;
+        }
+        if (num > 1e11) {
+            num = Math.floor(num / 1000);
+        }
+        return num;
     };
 
     $scope.isWithinTwoMonths = function(item) {
-        if (!item) return false;
-
-        var stockNum = Number(item.product_stock_num);
-        var endSec = parseExpiryToSeconds(item.date_end2 || item.date_end);
+        if (!item) {
+            return false;
+        }
+        var expSec = $scope.parseUnixSeconds(item.date_end2);
+        if (isNaN(expSec)) {
+            return false;
+        }
         var nowSec = Math.floor(Date.now() / 1000);
-        var twoMonthsSec = getTwoMonthsLaterSeconds(nowSec);
+        var diff = expSec - nowSec;
+        return diff > 0 && diff <= TWO_MONTHS_SECONDS;
+    };
 
-        var passStock = !isNaN(stockNum) && stockNum > 0;
-        var passDate = !isNaN(endSec) && endSec > nowSec && endSec <= twoMonthsSec;
-
-        console.log('[ExpiryModal] check item:', {
-            code: item.product_code,
-            stock: item.product_stock_num,
-            date_end2: item.date_end2,
-            date_end: item.date_end,
-            endSec: endSec,
-            nowSec: nowSec,
-            twoMonthsSec: twoMonthsSec,
-            passStock: passStock,
-            passDate: passDate
-        });
-
-        return passStock && passDate;
+    $scope.getDaysLeft = function(dateEnd2) {
+        var expSec = $scope.parseUnixSeconds(dateEnd2);
+        if (isNaN(expSec)) {
+            return 0;
+        }
+        var nowSec = Math.floor(Date.now() / 1000);
+        return Math.max(0, Math.ceil((expSec - nowSec) / 86400));
     };
 
     $scope.openExpiryModal = function() {
-        $scope.showExpiryModal = true;
-        var $ = window.jQuery || window.$;
-        var modalEl = document.getElementById('Product_date_end_noti_modal');
-
-        if (!modalEl) {
-            console.warn('[ExpiryModal] #Product_date_end_noti_modal not found in DOM');
-            return;
-        }
-
-        if ($ && typeof $.fn.modal === 'function') {
-            $(modalEl).modal({
-                backdrop: 'static',
-                keyboard: true,
-                show: true
-            });
-        } else {
-            console.warn('[ExpiryModal] Bootstrap jQuery modal plugin not available; using fallback');
-            modalEl.style.display = 'block';
-            modalEl.className += ' in show';
-        }
-    };
-
-    $scope.closeExpiryModal = function() {
-        $scope.showExpiryModal = false;
-        var $ = window.jQuery || window.$;
-        var modalEl = document.getElementById('Product_date_end_noti_modal');
-
-        if (!modalEl) return;
-
-        if ($ && typeof $.fn.modal === 'function') {
-            $(modalEl).modal('hide');
-        } else {
-            modalEl.style.display = 'none';
-            modalEl.className = modalEl.className.replace(/\b(in|show)\b/g, '').trim();
+        if (typeof angular !== 'undefined' && angular.element && angular.element(
+                '#Product_date_end_noti_modal').length) {
+            angular.element('#Product_date_end_noti_modal').modal('show');
+        } else if (typeof $ !== 'undefined' && $('#Product_date_end_noti_modal').length) {
+            $('#Product_date_end_noti_modal').modal('show');
         }
     };
 
@@ -1552,7 +1472,7 @@ app.controller('Index', function($scope, $http, $location) {
 
                 var items = Array.isArray(response.data) ? response.data : [];
                 $scope.nearExpiryList = items.filter($scope.isWithinTwoMonths).map(function(item) {
-                    item.days_left = $scope.getDaysLeft(item.date_end2 || item.date_end);
+                    item.days_left = $scope.getDaysLeft(item.date_end2);
                     return item;
                 });
 
