@@ -266,7 +266,7 @@ body {
 
 
 
-           <!-- product date end  -->
+            <!-- product date end  -->
             <div class="col-md-6">
                 <a style="text-decoration:none;" href="<?php echo $base_url;?>/warehouse/dateend"
                     title="<?=$lang_clickthisalllist?>">
@@ -1283,29 +1283,29 @@ app.controller('Index', function($scope, $http, $location) {
     // $scope.Saletoday();
 
 
-  
-
-	$scope.get_product_value = function() {
-    $http.get('sale/product_value/Getstock')
-        .then(function(response) {
-            console.log("Getstock response:", response.data);
-            $scope.product_value_list = response.data;
-        });
-};
-$scope.get_product_value();
 
 
+    $scope.get_product_value = function() {
+        $http.get('sale/product_value/Getstock')
+            .then(function(response) {
+                console.log("Getstock response:", response.data);
+                $scope.product_value_list = response.data;
+            });
+    };
+    $scope.get_product_value();
 
-	 // $scope.Productstockless = function() {
 
-  //       $http.get('Home/Getstockless')
-  //           .then(function(response) {
-  //               console.log("Productstockless response:", response.data); // debug
-  //               $scope.productstockless = response.data;
 
-  //           });
-  //   };
-  //   $scope.Productstockless();
+    // $scope.Productstockless = function() {
+
+    //       $http.get('Home/Getstockless')
+    //           .then(function(response) {
+    //               console.log("Productstockless response:", response.data); // debug
+    //               $scope.productstockless = response.data;
+
+    //           });
+    //   };
+    //   $scope.Productstockless();
 
 
     // ==============================================
@@ -1398,63 +1398,65 @@ $scope.get_product_value();
         $('#Delall_product').modal('show');
     };
 
-	// NEW: 2-Month Product Expiration Alert & Popup
+    // NEW: 2-Month Product Expiration Alert & Popup
 
-    var TWO_MONTHS_SECONDS = 60 * 24 * 60 * 60; // 60 days in seconds
+    var TWO_MONTHS_SECONDS = 60 * 24 * 60 * 60; // 5184000 seconds (60 days)
 
     $scope.nearExpiryList = [];
-    $scope.showExpiryModal = false;
 
-    $scope.getDaysLeft = function(dateEnd2) {
-        var endSec = Number(dateEnd2);
-        if (!endSec) return 0;
-        var nowSec = Math.floor(Date.now() / 1000);
-        return Math.max(0, Math.ceil((endSec - nowSec) / 86400));
+    $scope.parseUnixSeconds = function(val) {
+        if (val === null || val === undefined || val === '') {
+            return NaN;
+        }
+
+        if (typeof val === 'string') {
+            var match = val.trim().match(/^(\d{2})-(\d{2})-(\d{4})$/);
+            if (match) {
+                var day = Number(match[1]);
+                var month = Number(match[2]) - 1;
+                var year = Number(match[3]);
+                return Math.floor(new Date(year, month, day).getTime() / 1000);
+            }
+        }
+
+        var num = Number(val);
+        if (!isFinite(num) || num <= 0) {
+            return NaN;
+        }
+        if (num > 1e11) {
+            num = Math.floor(num / 1000);
+        }
+        return num;
     };
 
     $scope.isWithinTwoMonths = function(item) {
-        if (!item || !item.date_end2) return false;
+        if (!item) {
+            return false;
+        }
+        var expSec = $scope.parseUnixSeconds(item.date_end2);
+        if (isNaN(expSec)) {
+            return false;
+        }
         var nowSec = Math.floor(Date.now() / 1000);
-        var endSec = Number(item.date_end2);
-        if (!endSec) return false;
-        return endSec > nowSec && (endSec - nowSec) <= TWO_MONTHS_SECONDS;
+        var diff = expSec - nowSec;
+        return diff > 0 && diff <= TWO_MONTHS_SECONDS;
+    };
+
+    $scope.getDaysLeft = function(dateEnd2) {
+        var expSec = $scope.parseUnixSeconds(dateEnd2);
+        if (isNaN(expSec)) {
+            return 0;
+        }
+        var nowSec = Math.floor(Date.now() / 1000);
+        return Math.max(0, Math.ceil((expSec - nowSec) / 86400));
     };
 
     $scope.openExpiryModal = function() {
-        $scope.showExpiryModal = true;
-        var $ = window.jQuery || window.$;
-        var modalEl = document.getElementById('Product_date_end_noti_modal');
-
-        if (!modalEl) {
-            console.warn('[ExpiryModal] #Product_date_end_noti_modal not found in DOM');
-            return;
-        }
-
-        if ($ && typeof $.fn.modal === 'function') {
-            $(modalEl).modal({
-                backdrop: 'static',
-                keyboard: true,
-                show: true
-            });
-        } else {
-            console.warn('[ExpiryModal] Bootstrap jQuery modal plugin not available; using fallback');
-            modalEl.style.display = 'block';
-            modalEl.className += ' in show';
-        }
-    };
-
-    $scope.closeExpiryModal = function() {
-        $scope.showExpiryModal = false;
-        var $ = window.jQuery || window.$;
-        var modalEl = document.getElementById('Product_date_end_noti_modal');
-
-        if (!modalEl) return;
-
-        if ($ && typeof $.fn.modal === 'function') {
-            $(modalEl).modal('hide');
-        } else {
-            modalEl.style.display = 'none';
-            modalEl.className = modalEl.className.replace(/\b(in|show)\b/g, '').trim();
+        if (typeof angular !== 'undefined' && angular.element && angular.element(
+                '#Product_date_end_noti_modal').length) {
+            angular.element('#Product_date_end_noti_modal').modal('show');
+        } else if (typeof $ !== 'undefined' && $('#Product_date_end_noti_modal').length) {
+            $('#Product_date_end_noti_modal').modal('show');
         }
     };
 
