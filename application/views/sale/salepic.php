@@ -2250,21 +2250,22 @@ pregetlistcus()" class="form-control" placeholder="<?php echo $lang_sp_42;?>"
                                     <span ng-if="quotation_type=='1'" style="font-size: 20px;font-weight: bold;">
                                         ໃບສະເໜີລາຄາ/ໃບແຈ້ງໜີ້
                                     </span>
+                                    <span ng-if="quotation_type=='2'" style="font-size: 20px;font-weight: bold;">
+                                        ໃບສົ່ງສິນຄ້າ
+                                    </span>
                                     <!-- add new 241126 -->
                                     <span ng-switch="sale_type + ''">
                                         <span ng-switch-when="1"
-                                            style="color: #000;font-size: 20px;font-weight: bold;">(ບິນຂາຍຍ່ອຍ)</span>
+                                            style="color: #000;font-size: 20px;font-weight: bold;">(ຂາຍຍ່ອຍ)</span>
                                         <span ng-switch-when="2"
-                                            style="color: #000;font-size: 20px;font-weight: bold;">(ບິນຂາຍສົ່ງ)</span>
+                                            style="color: #000;font-size: 20px;font-weight: bold;">(ຂາຍສົ່ງ)</span>
                                         <span ng-switch-default style="color: #000;">-</span>
                                     </span>
                                     <!-- add new 241126 -->
 
 
 
-                                    <span ng-if="quotation_type=='2'" style="font-size: 20px;font-weight: bold;">
-                                        ໃບສົ່ງສິນຄ້າ
-                                    </span>
+
 
 
                                     <!-- <span ng-if="pay_type!='4'" style="font-size: 20px;font-weight: bold;">
