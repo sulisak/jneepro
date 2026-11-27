@@ -50,10 +50,10 @@ foreach ($Getpermission_rule as $value) {
             </div>
 
 
-            <!-- <br />
-<center>
-<img ng-if="!list" src="<?php echo $base_url;?>/pic/loading.gif">
-</center> -->
+            <br />
+            <!-- <center>
+                <img ng-if="!list" src="<?php echo $base_url;?>/pic/loading.gif">
+            </center> -->
 
 
             <?php
