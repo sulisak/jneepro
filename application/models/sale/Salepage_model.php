@@ -798,6 +798,7 @@ $data['store_id'] = $_SESSION['store_id'];
 $data['shift_id'] = $_SESSION['shift_id'];
 $data['branch_id'] = $_SESSION['branch_id'];
 
+unset($data['sale_type']);
 
 $this->db->insert("sale_list_datail", $data);
 
